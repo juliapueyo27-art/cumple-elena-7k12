@@ -82,7 +82,7 @@ async function idbAll(){const d=await idb();return new Promise((ok,no)=>{const o
 const UC={};const U=k=>typeof M[k]=="string"?M[k]:(UC[k]||(UC[k]=URL.createObjectURL(M[k])));
 const blobOf=k=>{const v=M[k];if(typeof v!="string")return v;const a=v.split(","),bs=atob(a[1]),u=new Uint8Array(bs.length);for(let i=0;i<bs.length;i++)u[i]=bs.charCodeAt(i);return new Blob([u],{type:"image/jpeg"})};
 async function decode(f){try{return await createImageBitmap(f)}catch(e){const u=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsDataURL(f)});return new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=()=>no(new Error("imagen no válida"));im.src=u})}}
-function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),5000)}
 async function shrink(f){const b=await decode(f),k=Math.min(1,900/Math.max(b.width,b.height)),w=Math.round(b.width*k),h=Math.round(b.height*k);
  const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.drawImage(b,0,0,w,h);
  const bar=Math.max(28,Math.round(h*.06)),fs=Math.round(bar*.55);x.fillStyle="rgba(255,255,255,.85)";x.fillRect(0,h-bar,w,bar);
@@ -109,7 +109,7 @@ menu:()=>`<h2>Hola, ${esc(S.name)} 🌸</h2><div class="menu">
 <button data-go="secreto">🔒<span>Solo para Elena<small>Después del cumple</small></span></button></div>`,
 fotos:()=>{const ks=keys("p").concat(keys("f"));return `<h2>Mis fotos 📸</h2><div class="c"><label class="lbl">＋ Subir foto<input type="file" accept="image/*" multiple data-free hidden></label><button data-dl>⬇️ Descargar todas</button></div>${ks.length?`<div class="grid">${ks.map(k=>`<img data-share="${k}" src="${U(k)}" alt="Una foto tuya">`).join("")}</div><p style="font-size:14px">Toca una foto para compartirla con Julia o tus amigas.</p>`:"<p>Aún no hay fotos. ¡Haz la primera!</p>"}`},
 retos:()=>`<h2>Retos de la tarde 🛍️</h2><p style="margin-top:2px">Cada reto da una estrella ⭐</p>`+R.map((r,i)=>{if(r.s&&stars()<5)return `<div class="reto"><span class="e">🔒</span><div><b>Misión secreta</b><span>Se desbloquea con 5 estrellas</span></div></div>`;
- const d=S.done[i];return `<div class="reto ${d?"ok":""}"><span class="e">${d?"⭐":r.e}</span><div style="flex:1"><b>${r.t}</b><span>${r.d}</span>${r.ph?`<label class="lbl" style="padding:6px 14px;font-size:15px">📷 ${M["p"+i]?"Cambiar":"Hacer foto"}<input type="file" accept="image/*" capture="environment" data-ph="${i}" hidden></label>`:`<br><button data-done="${i}" style="padding:6px 14px;font-size:15px;margin-top:8px">${d?"Hecho ✅":"¡Hecho!"}</button>`}</div>${M["p"+i]?`<img src="${U("p"+i)}" alt="Tu foto del reto">`:""}</div>`}).join(""),
+ const d=S.done[i];return `<div class="reto ${d?"ok":""}"><span class="e">${d?"⭐":r.e}</span><div style="flex:1"><b>${r.t}</b><span>${r.d}</span>${r.ph?`<label class="lbl" style="padding:6px 14px;font-size:15px">📷 ${M["p"+i]?"Cambiar":"Hacer foto"}<input type="file" accept="image/*" capture="environment" data-ph="${i}" hidden></label>`:`<br><button data-done="${i}" style="padding:6px 14px;font-size:15px;margin-top:8px">${d?"Hecho ✅":"¡Hecho!"}</button>`}</div>${M["p"+i]?`<img src="${U("p"+i)}" data-share="p${i}" alt="Tu foto del reto. Tócala para enviarla">`:""}</div>`}).join(""),
 msgs:()=>`<h2>Mensaje para Elena 💌</h2><p>Escribe lo que quieras decirle. Después lo envías a Julia y Elena lo verá más adelante.</p><textarea id="dm" maxlength="500" placeholder="Querida Elena…" aria-label="Tu mensaje">${esc(S.msg)}</textarea><div class="c"><button class="big" data-send>Enviar por WhatsApp 💌</button></div>`,
 logros:()=>{const n=keys("p").length+keys("f").length,b=[["📸","Fotógrafa","5 fotos o más",n>=5],["⭐","Cazaestrellas","5 estrellas",stars()>=5],["🎬","Actriz","Un vídeo en el Momento Elena",keys("v").length>0],["💌","Cariñosa","Un mensaje enviado",S.sent>0],["👑","Reina del mall","Todos los retos",R.every((r,i)=>S.done[i]||r.s&&stars()<5)&&stars()>=8]];
  return `<h2>Mis logros 👑</h2>`+b.map(x=>`<div class="badge ${x[3]?"":"off"}"><span style="font-size:32px">${x[0]}</span><div><b>${x[1]}</b><br><span style="font-size:14px">${x[2]}</span></div></div>`).join("")},
@@ -122,19 +122,19 @@ secreto:()=>{if(!S.test&&Date.now()<TEND)return `<div class="c"><h2>Solo para El
 const ext=k=>k[0]!="v"?".jpg":/quicktime/.test(M[k].type)?".mov":".mp4";
 function summary(){return "Cumple de Elena 12\nNombre: "+S.name+"\nEstrellas: "+stars()+"\nRetos hechos: "+(R.filter((r,i)=>S.done[i]).map(r=>r.t).join(", ")||"ninguno")+"\nFotos: "+(keys("p").length+keys("f").length)+" · Vídeos: "+keys("v").length+"\nMensaje para Elena: "+(S.msg||"(sin mensaje)")}
 async function up1(kind,body,name){const fd=new FormData();fd.append("file",body,name);fd.append("upload_preset",CLOUD.preset);fd.append("folder",CLOUD.folder+"/"+(S.name||"sin-nombre").replace(/[^\w-]/g,"_"));
- const r=await fetch("https://api.cloudinary.com/v1_1/"+CLOUD.name+"/"+kind+"/upload",{method:"POST",body:fd});if(!r.ok)throw new Error(r.status)}
+ const r=await fetch("https://api.cloudinary.com/v1_1/"+CLOUD.name+"/"+kind+"/upload",{method:"POST",body:fd});if(!r.ok){let m=r.status;try{const j=await r.json();m=(j.error&&j.error.message)||m}catch(x){}throw new Error(m)}}
 async function uploadAll(){const b=$("#upb"),st=$("#ups"),ks=keys("p").concat(keys("f"),keys("v")).filter(k=>!S.up[k]);let n=0;b.disabled=true;
  try{for(const k of ks){st.textContent="Subiendo "+(++n)+" de "+(ks.length+1)+"…";await up1(k[0]=="v"?"video":"image",blobOf(k),k+ext(k));S.up[k]=1;save()}
   st.textContent="Subiendo resumen…";await up1("raw",new Blob([summary()],{type:"text/plain"}),"resumen.txt");
   st.textContent="¡Listo! Todo enviado ✅";toast("¡Todo enviado a Julia! 💖")}
- catch(er){st.textContent="Falló la subida. Inténtalo otra vez.";toast("No se pudo subir. Revisa internet")}
+ catch(er){st.textContent="Falló: "+(er&&er.message||er);toast("No se pudo subir: "+(er&&er.message||er))}
  b.disabled=false}
 async function shareAll(){const fs=keys("p").concat(keys("f"),keys("v")).map(k=>{const B=blobOf(k);return new File([B],(k[0]=="v"?"video-":"foto-")+S.name+"-"+k+ext(k),{type:B.type})});
  const d={text:summary(),title:"Cumple de Elena 12"};if(fs.length)d.files=fs;
  try{if(navigator.canShare&&navigator.canShare(d))await navigator.share(d);else await navigator.share({text:summary()})}catch(er){if(er.name!="AbortError")toast("Este móvil no permite compartir todo junto. Usa «Mis fotos»")}}
 let busy=false;
 async function autoUp(){if(!CLOUD.name||busy)return;busy=true;
- try{for(const k of keys("p").concat(keys("f"),keys("v"))){if(S.up[k])continue;await up1(k[0]=="v"?"video":"image",blobOf(k),k+ext(k));S.up[k]=1;save();toast("☁️ Enviada a Julia")}}catch(e){}
+ try{for(const k of keys("p").concat(keys("f"),keys("v"))){if(S.up[k])continue;await up1(k[0]=="v"?"video":"image",blobOf(k),k+ext(k));S.up[k]=1;save();toast("☁️ Enviada a Julia")}}catch(e){toast("No se pudo subir: "+(e&&e.message||e))}
  busy=false}
 async function autoMsg(){if(!CLOUD.name||!S.msg)return;try{await up1("raw",new Blob(["Mensaje para Elena de "+S.name+":\n"+S.msg],{type:"text/plain"}),"mensaje-"+Date.now()+".txt")}catch(e){}}
 async function dlAll(){const ks=keys("p").concat(keys("f"),keys("v"));if(!ks.length){toast("Aún no hay fotos");return}
@@ -159,7 +159,7 @@ app.addEventListener("click",async e=>{
 app.addEventListener("change",async e=>{
  const i=e.target,fs=i.files;if(!fs||!fs.length)return;
  try{
-  if(i.dataset.ph!==undefined){const n=i.dataset.ph;await put("p"+n,await shrink(fs[0]));S.done[n]=1;save();toast("¡Foto guardada! ⭐");again();autoUp()}
+  if(i.dataset.ph!==undefined){const n=i.dataset.ph;await put("p"+n,await shrink(fs[0]));S.done[n]=1;save();toast("¡Foto guardada! ⭐ Toca la foto para enviarla al grupo");again();autoUp()}
   else if(i.hasAttribute("data-free")){for(const f of fs)await put("f"+Date.now()+Math.random().toString(36).slice(2,5),await shrink(f));toast("¡Fotos guardadas! 📸");again();autoUp()}
   else if(i.dataset.vid!==undefined){const f=fs[0];if(f.size>120e6){toast("El vídeo es muy grande. Prueba con uno de 10 segundos");return}await put("v"+i.dataset.vid,f);toast("¡Vídeo guardado! 🎬");again();autoUp()}
  }catch(er){toast("No se pudo guardar la foto ("+(er&&er.message||er)+")")}
